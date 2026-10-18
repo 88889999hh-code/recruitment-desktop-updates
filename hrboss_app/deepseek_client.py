@@ -18,7 +18,7 @@ class DeepSeekError(Exception):
 
 class DeepSeekClient:
     def __init__(self, api_key: str, base_url: str = 'https://api.deepseek.com/chat/completions',
-                 model: str = 'deepseek-chat', timeout: int = 20):
+                 model: str = 'deepseek-flash', timeout: int = 20):
         self.api_key = api_key
         self.base_url = base_url
         self.model = model

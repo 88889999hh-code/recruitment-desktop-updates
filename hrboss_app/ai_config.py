@@ -14,7 +14,7 @@ AI_CFG_FILE = DATA_DIR / 'ai_config.json'
 AI_DEF = {
     # --- DeepSeek ---
     'deepseek_api_key': '',
-    'deepseek_model': 'deepseek-chat',
+    'deepseek_model': 'deepseek-flash',
     'deepseek_base_url': 'https://api.deepseek.com/chat/completions',
 
     # --- 功能开关 ---
@@ -63,6 +63,8 @@ def load_ai_cfg():
             with open(AI_CFG_FILE, encoding='utf-8') as source:
                 raw = json.load(source)
             raw.pop('deepseek_api_key', None)
+            if raw.get('deepseek_model') == 'deepseek-chat':
+                raw['deepseek_model'] = 'deepseek-flash'
             c.update(raw)
     except Exception:
         pass
