@@ -1,0 +1,7 @@
+# 浏览器自动化驱动（连接本机 Chrome / Edge，操控 BOSS直聘 网页版）
+# No third-party runtime dependencies in the public-login candidate.
+
+# 调用 DeepSeek API 生成 AI 回复
+# Paid model calls are locked; requests is not bundled.
+
+# tkinter 为 Python 标准库，Windows 版 Python 默认自带，无需在此声明

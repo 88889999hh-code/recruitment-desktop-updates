@@ -1,0 +1,59 @@
+name: Build HRBOSS public-login Windows EXE
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-exe:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+      - name: Verify public-login source excludes restricted driver
+        shell: pwsh
+        run: |
+          $restricted = Select-String -Path hrboss_app/*.py -Pattern '^\s*(from|import)\s+DrissionPage\b|--remote-allow-origins|--remote-debugging-port'
+          if ($restricted) { throw 'Restricted browser driver or debugging flag present' }
+      - name: Test safe HRBOSS derivative
+        shell: pwsh
+        env:
+          PYTHONPATH: hrboss_app
+        run: python -m unittest discover -s hrboss_app/tests -v
+      - name: Install build tool only
+        run: python -m pip install --disable-pip-version-check pyinstaller==6.22.3
+      - name: Build standalone EXE with embedded Python
+        shell: pwsh
+        run: >-
+          python -m PyInstaller --noconfirm --clean --onefile --windowed
+          --name Recruitment-HRBOSS-Public-Login
+          --paths hrboss_app
+          --hidden-import ai_panel --hidden-import ai_config
+          --hidden-import chat_ai_engine --hidden-import knowledge_base
+          --hidden-import conversation_store --hidden-import safety
+          --hidden-import deepseek_client --hidden-import rate_limiter
+          --add-data "hrboss_app/LICENSE-HRBOSS-MIT.txt;."
+          hrboss_app/boss_recruiter.py
+      - name: Record installer hash and size
+        shell: pwsh
+        run: |
+          $exe = 'dist/Recruitment-HRBOSS-Public-Login.exe'
+          if (!(Test-Path $exe)) { throw 'Windows EXE missing' }
+          $hash = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          $size = (Get-Item $exe).Length
+          "$hash  Recruitment-HRBOSS-Public-Login.exe" | Set-Content dist/SHA256SUMS.txt
+          "SIZE_BYTES=$size"
+          "SHA256=$hash"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: hrboss-public-login-windows
+          path: |
+            dist/Recruitment-HRBOSS-Public-Login.exe
+            dist/SHA256SUMS.txt
+            hrboss_app/LICENSE-HRBOSS-MIT.txt
+          retention-days: 1
