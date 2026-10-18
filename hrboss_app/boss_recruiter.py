@@ -3008,7 +3008,42 @@ class App:
         self.root.destroy()
 
 
+def _self_test():
+    """Windows EXE smoke check without GUI, browser, network, or private data."""
+    import tempfile
+    from conversation_store import ConversationStore, conversation_key
+    from knowledge_base import KnowledgeBase
+    from ai_panel import AIPanel  # Verify the dynamically loaded UI is bundled.
+    from safety import require_live_send
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        kb = KnowledgeBase(root / 'knowledge')
+        if kb.match_rule('每天直播多久？') != '每天直播 3 小时。':
+            raise RuntimeError('安全话术未打包')
+        store = ConversationStore(root / 'history.db')
+        key = conversation_key('synthetic:conversation:1')
+        store.record_inbound(key, 'synthetic:message:1', '每天直播多久？')
+        if len(store.history(key)) != 1:
+            raise RuntimeError('本地会话账本未就绪')
+        store.close()
+        try:
+            require_live_send()
+        except PermissionError:
+            pass
+        else:
+            raise RuntimeError('真实发送安全闸未关闭')
+    receipt = os.environ.get('HRBOSS_SELFTEST_RECEIPT')
+    if receipt:
+        path = Path(receipt)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text('HRBOSS_PUBLIC_LOGIN_SAFE_OK\n', encoding='ascii')
+    return 0
+
+
 if __name__ == '__main__':
+    if '--self-test' in sys.argv:
+        sys.exit(_self_test())
     root = tk.Tk()
     app = App(root)
     root.protocol('WM_DELETE_WINDOW', app.on_close)

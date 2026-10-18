@@ -31,6 +31,15 @@ class FakeApp:
 
 
 class PublicBrowserTests(unittest.TestCase):
+    def test_selftest_never_opens_browser_and_writes_receipt(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            receipt = Path(tmp) / 'receipt.txt'
+            with patch.dict('os.environ', {'HRBOSS_SELFTEST_RECEIPT': str(receipt)}), \
+                 patch.object(boss_recruiter.subprocess, 'Popen') as popen:
+                self.assertEqual(boss_recruiter._self_test(), 0)
+            popen.assert_not_called()
+            self.assertEqual(receipt.read_text().strip(), 'HRBOSS_PUBLIC_LOGIN_SAFE_OK')
+
     def test_browser_launch_uses_isolated_profile_without_debug_endpoint(self):
         with tempfile.TemporaryDirectory() as tmp:
             fake = FakeApp()

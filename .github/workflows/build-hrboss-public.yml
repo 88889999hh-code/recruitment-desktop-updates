@@ -39,6 +39,16 @@ jobs:
           --hidden-import deepseek_client --hidden-import rate_limiter
           --add-data "hrboss_app/LICENSE-HRBOSS-MIT.txt;."
           hrboss_app/boss_recruiter.py
+      - name: Smoke launch actual Windows EXE without browser or network
+        shell: pwsh
+        run: |
+          $env:HRBOSS_SELFTEST_RECEIPT = "$pwd/dist/selftest.txt"
+          & ./dist/Recruitment-HRBOSS-Public-Login.exe --self-test
+          if ($LASTEXITCODE -ne 0) { throw 'EXE self-test exited nonzero' }
+          if (!(Test-Path $env:HRBOSS_SELFTEST_RECEIPT)) { throw 'EXE self-test receipt missing' }
+          if ((Get-Content $env:HRBOSS_SELFTEST_RECEIPT -Raw).Trim() -ne 'HRBOSS_PUBLIC_LOGIN_SAFE_OK') {
+            throw 'EXE self-test receipt invalid'
+          }
       - name: Record installer hash and size
         shell: pwsh
         run: |
