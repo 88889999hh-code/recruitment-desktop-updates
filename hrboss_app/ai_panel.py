@@ -64,7 +64,7 @@ class AIPanel:
         self.ai_client = DeepSeekClient(
             api_key=self.cfg.get('deepseek_api_key', ''),
             base_url=self.cfg.get('deepseek_base_url'),
-            model=self.cfg.get('deepseek_model', 'deepseek-chat'),
+            model=self.cfg.get('deepseek_model', 'deepseek-flash'),
         )
         self.engine = ChatAIEngine(
             get_page=self.get_page,
@@ -290,10 +290,10 @@ class AIPanel:
         sec1.pack(fill='x', **pad)
         sec1.grid_columnconfigure(1, weight=1)
         tk.Label(sec1, text='模型:', bg='white').grid(row=0, column=0, sticky='w', padx=6, pady=4)
-        self.v_model = tk.StringVar(value=self.cfg.get('deepseek_model', 'deepseek-chat'))
+        self.v_model = tk.StringVar(value=self.cfg.get('deepseek_model', 'deepseek-flash'))
         tk.Entry(sec1, textvariable=self.v_model).grid(row=0, column=1, sticky='ew', padx=6, pady=4)
         tk.Button(sec1, text='保存', command=self._save_model, bg='#1d4ed8', fg='white').grid(row=0, column=2, padx=6)
-        tk.Label(sec1, text='一般不用改，默认 deepseek-chat 即可。', bg='white', fg='#94a3b8').grid(row=1, column=0, columnspan=3, sticky='w', padx=6, pady=(0, 4))
+        tk.Label(sec1, text='预设 deepseek-flash；当前测试版不发起付费调用。', bg='white', fg='#94a3b8').grid(row=1, column=0, columnspan=3, sticky='w', padx=6, pady=(0, 4))
 
         sec2 = tk.LabelFrame(w, text='  目标判定  ', bg='white', font=('微软雅黑', 9, 'bold'))
         sec2.pack(fill='x', **pad)
@@ -354,7 +354,7 @@ class AIPanel:
         self._log('知识库已重新加载', 'ok')
 
     def _save_model(self):
-        self.cfg['deepseek_model'] = self.v_model.get().strip() or 'deepseek-chat'
+        self.cfg['deepseek_model'] = self.v_model.get().strip() or 'deepseek-flash'
         save_ai_cfg(self.cfg)
         self.ai_client.model = self.cfg['deepseek_model']
         self._log('模型设置已保存', 'ok')

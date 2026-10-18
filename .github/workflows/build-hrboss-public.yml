@@ -1,4 +1,4 @@
-name: Build HRBOSS public-login Windows EXE
+name: Build 乔芮 Boss public-login Windows EXE
 
 on:
   workflow_dispatch:
@@ -31,7 +31,7 @@ jobs:
         shell: pwsh
         run: >-
           python -m PyInstaller --noconfirm --clean --onefile --windowed
-          --name Recruitment-HRBOSS-Public-Login
+          --name "乔芮 Boss-公开登录测试版"
           --paths hrboss_app
           --hidden-import ai_panel --hidden-import ai_config
           --hidden-import chat_ai_engine --hidden-import knowledge_base
@@ -43,7 +43,7 @@ jobs:
         shell: pwsh
         run: |
           $env:HRBOSS_SELFTEST_RECEIPT = "$pwd/dist/selftest.txt"
-          $process = Start-Process -FilePath "$pwd/dist/Recruitment-HRBOSS-Public-Login.exe" -ArgumentList '--self-test' -Wait -PassThru
+          $process = Start-Process -FilePath "$pwd/dist/乔芮 Boss-公开登录测试版.exe" -ArgumentList '--self-test' -Wait -PassThru
           if ($process.ExitCode -ne 0) {
             if (Test-Path $env:HRBOSS_SELFTEST_RECEIPT) { Get-Content $env:HRBOSS_SELFTEST_RECEIPT }
             throw "EXE self-test exited $($process.ExitCode)"
@@ -55,18 +55,18 @@ jobs:
       - name: Record installer hash and size
         shell: pwsh
         run: |
-          $exe = 'dist/Recruitment-HRBOSS-Public-Login.exe'
+          $exe = 'dist/乔芮 Boss-公开登录测试版.exe'
           if (!(Test-Path $exe)) { throw 'Windows EXE missing' }
           $hash = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLowerInvariant()
           $size = (Get-Item $exe).Length
-          "$hash  Recruitment-HRBOSS-Public-Login.exe" | Set-Content dist/SHA256SUMS.txt
+          "$hash  乔芮 Boss-公开登录测试版.exe" | Set-Content dist/SHA256SUMS.txt
           "SIZE_BYTES=$size"
           "SHA256=$hash"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: hrboss-public-login-windows
+          name: qiaorui-boss-public-login-windows
           path: |
-            dist/Recruitment-HRBOSS-Public-Login.exe
+            dist/乔芮 Boss-公开登录测试版.exe
             dist/SHA256SUMS.txt
             hrboss_app/LICENSE-HRBOSS-MIT.txt
           retention-days: 1
