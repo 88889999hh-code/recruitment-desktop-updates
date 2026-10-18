@@ -2,6 +2,12 @@ name: Build HRBOSS public-login Windows EXE
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - codex/hrboss-public-login
+    paths:
+      - 'hrboss_app/**'
+      - '.github/workflows/build-hrboss-public.yml'
 
 permissions:
   contents: read
@@ -36,6 +42,7 @@ jobs:
           --hidden-import ai_panel --hidden-import ai_config
           --hidden-import chat_ai_engine --hidden-import knowledge_base
           --hidden-import conversation_store --hidden-import safety
+          --hidden-import draft_ui --hidden-import draft_assistant
           --hidden-import deepseek_client --hidden-import rate_limiter
           --add-data "hrboss_app/LICENSE-HRBOSS-MIT.txt;."
           hrboss_app/boss_recruiter.py
