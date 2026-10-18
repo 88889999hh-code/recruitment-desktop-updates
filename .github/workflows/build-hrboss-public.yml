@@ -14,6 +14,8 @@ permissions:
 
 jobs:
   windows-exe:
+    permissions:
+      contents: write # Needed only for the explicit test-only GitHub prerelease asset
     runs-on: windows-latest
     timeout-minutes: 25
     steps:
@@ -77,3 +79,22 @@ jobs:
             dist/SHA256SUMS.txt
             hrboss_app/LICENSE-HRBOSS-MIT.txt
           retention-days: 1
+      - name: Publish test-only Windows EXE for direct download
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = 'hrboss-public-login-draft-test-20261018'
+          $existing = gh release view $tag --json tagName 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            throw "Release tag already exists; manual version change required: $tag"
+          }
+          gh release create $tag `
+            'dist/Recruitment-HRBOSS-Public-Login.exe' `
+            'dist/SHA256SUMS.txt' `
+            'hrboss_app/LICENSE-HRBOSS-MIT.txt' `
+            --target "$env:GITHUB_SHA" `
+            --title 'HRBOSS QR Login + Local Draft | TEST ONLY' `
+            --notes 'Safe candidate only: official BOSS QR login page and offline synthetic draft rehearsal. Does not read or send any real candidate messages. Not a full automatic recruiter. Production use requires platform authorization and real Windows validation.' `
+            --prerelease
+          if ($LASTEXITCODE -ne 0) { throw 'GitHub test-only release upload failed' }
