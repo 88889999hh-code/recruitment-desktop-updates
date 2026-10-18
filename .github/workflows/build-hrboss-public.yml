@@ -43,8 +43,11 @@ jobs:
         shell: pwsh
         run: |
           $env:HRBOSS_SELFTEST_RECEIPT = "$pwd/dist/selftest.txt"
-          & ./dist/Recruitment-HRBOSS-Public-Login.exe --self-test
-          if ($LASTEXITCODE -ne 0) { throw 'EXE self-test exited nonzero' }
+          $process = Start-Process -FilePath "$pwd/dist/Recruitment-HRBOSS-Public-Login.exe" -ArgumentList '--self-test' -Wait -PassThru
+          if ($process.ExitCode -ne 0) {
+            if (Test-Path $env:HRBOSS_SELFTEST_RECEIPT) { Get-Content $env:HRBOSS_SELFTEST_RECEIPT }
+            throw "EXE self-test exited $($process.ExitCode)"
+          }
           if (!(Test-Path $env:HRBOSS_SELFTEST_RECEIPT)) { throw 'EXE self-test receipt missing' }
           if ((Get-Content $env:HRBOSS_SELFTEST_RECEIPT -Raw).Trim() -ne 'HRBOSS_PUBLIC_LOGIN_SAFE_OK') {
             throw 'EXE self-test receipt invalid'

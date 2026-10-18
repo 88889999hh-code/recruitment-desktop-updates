@@ -3043,7 +3043,15 @@ def _self_test():
 
 if __name__ == '__main__':
     if '--self-test' in sys.argv:
-        sys.exit(_self_test())
+        try:
+            sys.exit(_self_test())
+        except Exception as error:
+            receipt = os.environ.get('HRBOSS_SELFTEST_RECEIPT')
+            if receipt:
+                path = Path(receipt)
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(f'FAILED:{type(error).__name__}\n', encoding='ascii')
+            sys.exit(1)
     root = tk.Tk()
     app = App(root)
     root.protocol('WM_DELETE_WINDOW', app.on_close)
