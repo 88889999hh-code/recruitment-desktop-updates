@@ -299,6 +299,10 @@ class App:
         self._update_daily_display()
         self.st('安全核验模式：公开登录页可观察，真实发送和主动外联关闭')
 
+    def _open_local_reply_demo(self):
+        from draft_ui import open_demo_window
+        open_demo_window(self.root, DATA_DIR)
+
     def _open_ai_panel(self):
         if self.ai_panel is None:
             messagebox.showerror(
@@ -612,7 +616,7 @@ class App:
         for i in range(5):
             btn_row.grid_columnconfigure(i, weight=1, uniform='btn')
         btn_style = dict(fg='white', font=('微软雅黑', 11), relief='flat', bd=0, padx=10, pady=8, cursor='hand2')
-        self.btn_open = tk.Button(btn_row, text='① 启动浏览器', command=self._open, bg='#1d4ed8', **btn_style)
+        self.btn_open = tk.Button(btn_row, text='① 打开BOSS扫码页', command=self._open, bg='#1d4ed8', **btn_style)
         self.btn_open.grid(row=0, column=0, sticky='ew', padx=(0, 3))
         self.btn_start = tk.Button(btn_row, text='② 真实发送锁定', command=self._start,
                                    state='disabled', bg='#0f9d7a', **btn_style)
@@ -627,6 +631,14 @@ class App:
                           (self.btn_pause, '#f59e0b'), (self.btn_stop, '#dc2626'),
                           (self.btn_reset, '#64748b')):
             self._bind_hover(_b, _base)
+
+        lab_row = tk.Frame(left, bg='#f2f3f5')
+        lab_row.pack(fill='x', pady=(1, 4))
+        tk.Button(lab_row, text='本地聊天演练（只生成草稿，不发信）',
+                  command=self._open_local_reply_demo, bg='#475569', fg='white',
+                  relief='flat', font=('微软雅黑', 10), padx=12, pady=7).pack(side='left')
+        tk.Label(lab_row, text='真实 BOSS 自动收发须先取得平台授权',
+                 bg='#f2f3f5', fg='#b45309').pack(side='left', padx=12)
 
         # AI快捷操作：知识库入口 + 启停按钮，常驻不折叠，紧跟在①②按钮组下方，填补这里原本的空白
         if self.ai_panel is not None:
@@ -2392,7 +2404,7 @@ class App:
                 if self.browser_proc and self.browser_proc.poll() is not None:
                     raise RuntimeError('浏览器进程启动后退出')
                 self.log('普通 Chrome 独立档案已启动；未开放远程调试端口', 'ok')
-                self.log('只核验官方公开登录页；请勿输入验证码或访问候选人聊天', 'warn')
+                self.log('请在官方页面使用手机自行扫码；本程序不读取二维码、验证码或登录状态', 'warn')
                 self.root.after(0, lambda: self.card_browser.config(text='浏览器：公开页已打开'))
                 self.st('公开登录页已打开 — 真实发送保持关闭；稳定性待 Windows 读回')
                 self.root.after(0, lambda: self.btn_start.config(state='disabled'))
